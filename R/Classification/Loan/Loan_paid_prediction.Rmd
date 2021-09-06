@@ -1,0 +1,232 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# 環境設定
+```{r}
+rm(list = ls(all = T)); gc()
+pacman::p_load(ggplot2, stringr, pROC)
+```
+
+# 讀取資料
+```{r}
+# Loading LoanStats3a.csv and importing it into variable named "loan".
+loan <- data.table::fread("../R/LoanStats3a.csv")
+```
+
+# 資料前置處理
+```{r}
+# Keeping those records with "loan_status" in ("Charged Off", "Fully Paid")
+loan <- loan[loan$loan_status %in% c("Charged Off", "Fully Paid"),]
+```
+
+```{r}
+# 計算每一個欄位內容是否只有一種值(ex: 全是空格、全是NA值、只有一種值)
+level_length <- sapply(colnames(loan), function(x) eval(parse(text = paste("length(levels(as.factor(loan", "$", x, ")))", sep = ""))))
+# 找尋值多於一種的欄位
+col_level_length <- which(level_length > 1)
+# 將選取欄位帶入loan中，使得loan的欄位被更改為上一行所擁有的欄位
+loan <- loan %>%
+          dplyr::select(col_level_length)
+```
+
+```{r}
+# Searching the columns cotaining "some" white spaces, 
+# and changing them from "" to NA.
+loan <- loan %>% 
+           mutate_all(~replace(., .=="", NA)) %>%
+             as.data.frame()
+```
+
+```{r}
+# Delete the columns whose containing number of NA values is more than than number of half of total rows
+NA_number <- sapply(1:ncol(loan), function(x) ifelse(sum(is.na(loan[[x]])) < nrow(loan) * 0.5, x, NA))
+col_No_NA <- which(!is.na(NA_number))
+loan <- loan %>%
+          dplyr::select(col_No_NA)
+```
+
+```{r}
+# 將剩下沒有被刪除的NA值以-1填值
+loan <- loan %>% 
+           mutate_all(~replace(., is.na(.), -1)) %>%
+             as.data.frame()
+```
+
+```{r}
+# 將 int_rate、revol_util、term 等欄位的文字部分去除，並轉換為數值型態
+# library(stringr)
+loan$int_rate <- str_replace_all(string = loan$int_rate, pattern = "%", replacement = "")
+loan$int_rate <- as.numeric(loan$int_rate) * (0.01)
+loan$revol_util <- str_replace_all(string = loan$revol_util, pattern = "%", replacement = "")
+loan$revol_util <- as.numeric(loan$revol_util) * (0.01)
+loan$term <- str_replace_all(string = loan$term, pattern = "months", replacement = "")
+loan$term <- as.numeric(loan$term)
+```
+
+```{r}
+# 將欄位內容的 character 型態轉換為 factor 型態
+# 執行完這步驟便可確定 loan 資料集只有存在 numeric 和 factor 型態的資料
+loan <- loan %>% 
+          mutate_if(~is.character(.), as.factor) %>%
+            as.data.frame()
+```
+
+```{r}
+# 抽取 factor 型態的資料並命名為 loan_factor
+loan_factor <- select_if(loan, is.factor)
+
+# 找尋 loan_factor 中，內容的分級數目少於52的欄位，並轉變為 loan_factor 的新欄位
+level_factor_length <- sapply(colnames(loan_factor), function(x) eval(parse(text = paste("length(levels(loan_factor", "$", x, "))", sep = ""))))
+col_level_factor_length <- which(level_factor_length < 52)
+loan_factor <- loan_factor %>%
+                  dplyr::select(col_level_factor_length)
+
+# 調整"Fully Paid"和"Charged Off"的等級次序
+loan_factor$loan_status <- factor(loan_factor$loan_status, levels = c("Fully Paid", "Charged Off"))
+
+# 將 loan_factor 的資料轉換為 numeric 型態
+loan_factor <- loan_factor %>%
+                  mutate_if(~is.factor(.), as.numeric) %>%
+                    as.data.frame() - 1
+
+# 選取 loan 中 numeric 型態的資料
+loan <- select_if(loan, is.numeric)
+
+# 將只有 numeric 型態的 loan 與 loan_factor 資料合併為新的 loan 資料集
+loan <- cbind(loan, loan_factor)
+```
+
+```{r}
+# Split the dataset into training (70%) and testing sets (30%) 
+# with random seed set.seed(1).
+set.seed(1)
+train_loan_idx <- sample(1:nrow(loan), size = nrow(loan) * 0.7)
+test_loan_idx <- setdiff(1:nrow(loan), train_loan_idx)
+train_loan <- loan[train_loan_idx, ] # training sets
+test_loan <- loan[test_loan_idx, ] # testing sets
+```
+
+# 模型建置
+```{r}
+# Creating a general linear model named "loan_glm" 
+# and using summary() to realize which variables relevant to target variable "loan_status".
+loan_glm <- glm(loan_status ~ ., data = train_loan, family = "binomial")
+summary(loan_glm)
+```
+
+```{r}
+# 以 findCorrelation() 找出高度相關的預測變數並排除之
+FC <- findCorrelation(cor(train_loan), cutoff = .8)
+colnames(train_loan)[-FC] # 其他沒有高度相關的預測變數
+
+# 將從 colnames(train_loan)[-FC] 得到的預測變數帶入 glm 中，得出新模型 new_loan_glm
+new_loan_glm <- glm(loan_status ~ annual_inc + dti + delinq_2yrs + inq_last_6mths +
+                      open_acc + pub_rec + revol_bal + total_rec_late_fee + collection_recovery_fee + 
+                      last_pymnt_amnt + term + grade + emp_length + home_ownership + verification_status +
+                       purpose + addr_state + debt_settlement_flag, data = train_loan, family = "binomial")
+
+# 利用 summary() 了解各預 new_loan_glm 中測變數的顯著度，其中 
+# delinq_2yrs、collection_recovery_fee、emp_length、debt_settlement_flag 呈現不顯著狀態
+summary(new_loan_glm)
+```
+
+```{r}
+# 第一次逐步迴歸
+step(new_loan_glm)
+
+# 將第一次逐步迴歸所得到的最佳 formula 帶入 glm 中，得到新模型new_loan_glm_step1
+new_loan_glm_step1 <- glm(loan_status ~ annual_inc + dti + inq_last_6mths + 
+                      open_acc + pub_rec + revol_bal + total_rec_late_fee + collection_recovery_fee + 
+                      last_pymnt_amnt + term + grade + emp_length + home_ownership + 
+                      verification_status + addr_state + debt_settlement_flag, 
+                    family = "binomial", data = train_loan)
+
+# 利用 summary() 了解 new_loan_glm_step1 中各預測變數的顯著度，其中 
+# collection_recovery_fee、emp_length、debt_settlement_flag 呈現不顯著狀態
+summary(new_loan_glm_step1)
+
+# 第二次逐步迴歸
+step(new_loan_glm_step1)
+
+# 第一次和第二次逐步迴歸的結果皆相同，因此這邊我去除 summary() 中不顯著的預測變數
+# ，並再次執行 glm 迴歸模型，得出新模型 new_loan_glm_step2
+new_loan_glm_step2 <- glm(formula = loan_status ~ annual_inc + dti + inq_last_6mths + 
+                       open_acc + pub_rec + revol_bal + total_rec_late_fee + 
+                       last_pymnt_amnt + term + grade + home_ownership + 
+                       verification_status + addr_state, 
+                     family = "binomial", data = train_loan)
+
+# 利用 summary() 了解 new_loan_glm_step2 中各預測變數的顯著度，其中 
+# open_acc、home_ownership 呈現不顯著狀態
+summary(new_loan_glm_step2)
+
+# 第三次逐步迴歸
+step(new_loan_glm_step2)
+
+# 將第三次逐步迴歸所得到的最佳 formula 帶入 glm 中，得到新模型new_loan_glm_step3
+new_loan_glm_step3 <- glm(loan_status ~ annual_inc + dti + inq_last_6mths + 
+                    pub_rec + revol_bal + total_rec_late_fee + last_pymnt_amnt + 
+                    term + grade + verification_status + addr_state, family = "binomial", 
+                  data = train_loan)
+
+# 利用 summary() 了解 new_loan_glm_step3 中各預測變數的顯著度，其中各預測變數呈顯著狀態
+summary(new_loan_glm_step3)
+```
+
+# 模型預測
+```{r}
+# 訓練用資料集的 Predicited probabilities
+train_prob <- predict(new_loan_glm_step3, train_loan, type = "response")
+# Cutoff = 0.5 的情況下，# Cutoff = 0.5 的情況下，等於 1 (Charged Off)或 0 (Fully Paid)的預測結果
+train_preb <- ifelse(train_prob > 0.5, 1, 0)
+# train_pred 和 train_loan$loan_status 組成混淆矩陣(Charged Off = 1, Fully Paid = 0)
+train_loan_CM <- table(train_preb, train_loan$loan_status)
+# 找出訓練用資料集的 Accuracy = 0.8645242
+sum(diag(train_loan_CM) / nrow(train_loan))
+
+# 測試用資料集的 Predicited probabilities
+test_prob <- predict(new_loan_glm_step3, test_loan, type = "response")
+# Cutoff = 0.5 的情況下，等於 1 (Charged Off)或 0 (Fully Paid)的預測結果
+test_preb <- ifelse(test_prob > 0.5, 1, 0)
+# test_pred 和 test_loan$loan_status 組成混淆矩陣(Charged Off = 1, Fully Paid = 0)
+test_loan_CM <- table(test_preb, test_loan$loan_status)
+# 找出訓練用資料集的 Accuracy = 0.8655328
+sum(diag(test_loan_CM) / nrow(test_loan))
+```
+
+```{r}
+# library(pROC)
+
+train_roc <- roc(train_loan$loan_status, train_prob)
+plot.roc(train_roc, print.thres = "best", print.thres.best.method = "youden", print.auc = T, xlim = c(1, 0), ylim = c(0, 1))
+# 由圖中可知，最好的 cutoff 為0.14
+
+prop.table(table(train_loan$loan_status))
+# 由表中可知，最好的 cutoff 為0.1428725
+
+# TPR with cutoff = 0.5
+train_loan_CM[2, 2] / sum(train_loan_CM[, 2]) # TPR with cutoff = 0.2015582
+test_loan_CM[2, 2] / sum(test_loan_CM[, 2]) # TPR with cutoff = 0.198699
+
+# TPR with cutoff = 0.1428725
+train_loan_CM_0.1428725 <- table(ifelse(train_prob > 0.1428725, 1, 0), train_loan$loan_status)
+train_loan_CM_0.1428725[2, 2] / sum(train_loan_CM_0.1428725[, 2]) # Training TPR = 0.8439306
+
+test_loan_CM_0.1428725 <- table(ifelse(test_prob > 0.1428725, 1, 0), test_loan$loan_status)
+test_loan_CM_0.1428725[2, 2] / sum(test_loan_CM_0.1428725[, 2]) # Testing TPR = 0.8415139
+```
+
+```{r}
+train_roc <- roc(train_loan$loan_status, train_prob)
+# 畫出train_roc的pROC圖
+plot.roc(train_roc, print.thres = "best", print.thres.best.method = "youden", print.auc = T)
+auc(train_roc) # AUC = 0.8537
+
+test_roc <- roc(test_loan$loan_status, test_prob)
+# 畫出test_roc的pROC圖
+plot.roc(test_roc, print.thres = "best", print.thres.best.method = "youden", print.auc = T)
+auc(test_roc) # AUC = 0.8579
+```
+
