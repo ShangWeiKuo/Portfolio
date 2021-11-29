@@ -1,0 +1,312 @@
+---
+title: "信用風險預測"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    theme: default
+    social: menu
+    source_code: embed 
+runtime: shiny
+---
+
+```{r}
+# rm(list = ls(all = T)); invisible(gc())
+# pacman::p_load(dplyr, caret, ggplot2, plotly, yardstick, hrbrthemes, rchallenge, skimr, pROC, rpart, glmnet, randomForest, shiny, shinydashboard)
+library(dplyr)
+library(caret)
+library(plotly)
+library(yardstick)
+library(hrbrthemes)
+library(rchallenge)
+library(skimr)
+library(pROC)
+library(rpart)
+library(glmnet)
+library(randomForest)
+library(shiny)
+library(shinydashboard)
+data("german", package = "rchallenge")
+```
+
+資料描述 {data-icon="fas fa-clipboard-list"}
+=====================================================
+### **資料摘要** {data-width=75%}
+```{r}
+skimr::skim(german)
+```
+
+### **資料說明** {data-width=25%}
+要算檢定力(test power)需要一個對立假設
+
+模型預測 {data-icon="fas fa-chart-line"}
+=====================================================
+Column 1 {.sidebar data-width=300}
+-----------------------------------------------------
+```{r}
+br()
+sliderInput("datasplit", 
+            "資料切分:",
+            min = 0, 
+            max = 1,
+            value = 0.7, 
+            step = 0.05)
+
+selectInput(inputId = "selectTarget",
+            label = "選擇目標變數:",
+            choices = colnames(german),
+            selected = colnames(german)[21],
+            multiple = FALSE)
+
+selectInput(inputId = "selectVariables",
+            label = "選擇自變數:",
+            choices = colnames(german)[1:20],
+            selected = colnames(german)[1:20],
+            multiple = TRUE)
+
+selectInput(inputId = "selectModels",
+            label = "選擇模型:",
+            choices = c('Logistic', 
+                        'Lasso', 
+                        'Ridge',
+                        'Decision Tree', 
+                        'Random Forest'),
+            selected = 'Logistic',
+            multiple = FALSE)
+
+# numericInput("num", 
+#              "交叉驗證次數:", 
+#              2, # 初始值
+#              min = 1, 
+#              max = 100)
+
+result <- reactive({
+  # 自變數資料型態轉換(factor -> numeric)
+  german[, 1:20] <- german[, 1:20] %>%
+                      mutate_if(~is.factor(.), as.numeric) %>%
+                        as.data.frame() - 1
+  # 切分資料集
+  # 設定 random seed set.seed(2021)
+  set.seed(2021)
+  train_idx <- sample(1:nrow(german), size = nrow(german) * input$datasplit)
+  test_idx <- setdiff(1:nrow(german), train_idx)
+  train <- german[train_idx, c(input$selectVariables, input$selectTarget)] # 訓練資料集
+  test <- german[test_idx, c(input$selectVariables, input$selectTarget)] # 測試資料集
+  trainx <- as.matrix(train[, 1:20])
+  trainy <- as.numeric(train[, 21]) - 1
+  testx <- as.matrix(test[, 1:20])
+  testy <- as.numeric(test[, 21]) - 1
+  
+  # 設定交叉驗證參數
+  ctrl <- trainControl(method = "repeatedcv", 
+                       number = input$num, # 10-fold
+                       repeats = 2, #Repeated CV
+                       savePredictions = "final", 
+                       classProbs = TRUE,
+                       summaryFunction = twoClassSummary)
+
+  # 建模
+  form <- sprintf("%s~%s",input$selectTarget, paste0(input$selectVariables, collapse="+"))
+  if(input$selectModels == 'Logistic'){
+    # model <- train(as.formula(form), 
+    #                data = train, 
+    #                method = "glm", 
+    #                trControl = ctrl, 
+    #                metric = "ROC")
+    # set.seed(2021)
+    model <- glm(as.formula(form), family = binomial(), data = train)
+    
+    prod <- predict(model, test, type = "response")
+    pred <- factor(ifelse(prod > 0.5, "good", "bad"), levels = c("good", "bad"))
+    imp <- data.frame(rownames(varImp(model)))
+    imp$Imp <- varImp(model)$Overall
+    colnames(imp)[1] <- "Var"
+    imp <- imp[order(-imp$Imp), ] %>% top_n(5)
+    imp$Var <- factor(imp$Var, levels = imp$Var[order(imp$Imp)])
+  }else if(input$selectModels == 'Lasso'){
+    model <- cv.glmnet(x = trainx, y = trainy, family = binomial(), type.measure = 'auc', alpha = 1)
+    prod <- predict(model, testx, s = model$lambda.min)
+    pred <- factor(ifelse(prod > 0.5, "good", "bad"), levels = c("good", "bad"))
+    imp <- data.frame(rownames(coef(model))[-1])
+    colnames(imp)[1] <- "Var"
+    imp$Imp <- unname(coef(model)[-1])
+    imp <- imp[order(-imp$Imp), ] %>% top_n(5)
+    imp$Var <- factor(imp$Var, levels = imp$Var[order(imp$Imp)])
+  }else if(input$selectModels == 'Ridge'){
+    model <- cv.glmnet(x = trainx, y = trainy, family = binomial(), type.measure = 'auc', alpha = 0)
+    prod <- predict(model, testx, s = model$lambda.min)
+    pred <- factor(ifelse(prod > 0.5, "good", "bad"), levels = c("good", "bad"))
+    imp <- data.frame(rownames(coef(model))[-1])
+    colnames(imp)[1] <- "Var"
+    imp$Imp <- unname(coef(model)[-1])
+    imp <- imp[order(-imp$Imp), ] %>% top_n(5)
+    imp$Var <- factor(imp$Var, levels = imp$Var[order(imp$Imp)])
+  }else if(input$selectModels == 'Decision Tree'){
+    # cv.rpart <- train(as.formula(form), 
+    #                  data = train, 
+    #                  method = "rpart", 
+    #                  trControl = ctrl, 
+    #                  metric = "ROC",
+    #                  tuneGrid = expand.grid(cp = seq(0.0002, 0.001, 0.0001)))
+    DT <- rpart(as.formula(form), train, method="class")
+    prod <- predict(DT, test, type="prob")[,2]
+    pred <- factor(ifelse(prod > 0.5, "good", "bad"), levels = c("good", "bad"))
+    imp <- data.frame(names(DT$variable.importance))
+    colnames(imp)[1] <- "Var"
+    imp$Imp <- unname(DT$variable.importance)
+    imp <- imp[order(-imp$Imp), ] %>% top_n(5)
+    imp$Var <- factor(imp$Var, levels = imp$Var[order(imp$Imp)])
+  }else if(input$selectModels == 'Random Forest'){
+    model <- randomForest(x=trainx, y=factor(trainy))
+    prod <- predict(model, test, type = "prob")[, 2]
+    pred <- factor(ifelse(prod > 0.5, "good", "bad"), levels = c("good", "bad"))
+    imp <- data.frame(rownames(model$importance))
+    colnames(imp)[1] <- "Var"
+    imp$Imp <- unname(model$importance)
+    imp <- imp[order(-imp$Imp), ] %>% top_n(5)
+    imp$Var <- factor(imp$Var, levels = imp$Var[order(imp$Imp)])
+  }
+  
+  truth <- test$credit_risk
+  test_CM <- confusionMatrix(pred, truth, positive='good')
+  test_roc <- roc(truth, prod)
+  test_roc$specificities <- 1 - test_roc$specificities
+  roc_df <- data.frame(thresholds = test_roc$thresholds, specificities = test_roc$specificities, sensitivities = test_roc$sensitivities)
+  AUC <- round(auc(test_roc)*100, 2)
+  tit <- paste('AUC = ', toString(round(AUC,  2)))
+  roc_plot <- plot_ly(data = roc_df, x = ~specificities, y = ~sensitivities, type = 'scatter', mode = 'lines', fill = 'tozeroy') %>% layout(title = tit, xaxis = list(title = "False Positive Rate"), yaxis = list(title = "True Positive Rate")) %>% add_segments(x = 0, xend = 1, y = 0, yend = 1, line = list(dash = "dash", color = 'black'), inherit = FALSE, showlegend = FALSE)
+  
+  # TPR and FPR
+  tprfpr_plot <- plot_ly(data = roc_df, x = ~thresholds) %>%
+                  add_trace(y = ~specificities, mode = 'lines', name = 'False Positive Rate', type = 'scatter')%>%
+                  add_trace(y = ~sensitivities, mode = 'lines', name = 'True Positive Rate', type = 'scatter')
+  tprfpr_plot <- tprfpr_plot %>%   layout(legend=list(title=list(text='<b> Rate </b>')))
+  
+  # 混淆矩陣
+  # df_CM <- data.frame(test_CM)
+  # colnames(df_CM) <- c("Prediction", "Truth", "Value")
+  # p <- ggplotly(ggplot(df_CM, aes(Prediction, Truth, fill= Value)) + 
+  #       geom_tile() + 
+  #         geom_text(aes(label=Value), color="black") + 
+  #          scale_fill_gradient(low="grey", high="darkgreen") +
+  #          theme_ipsum())
+  m <- matrix(test_CM$table, nrow = 2, ncol = 2)
+  colors <- colorRampPalette(list('white', 'darkgreen'))(15)
+  x <- c("bad", "good")
+  y <- c("bad", "good")
+  df_CM <- expand.grid(x, y)
+  df_CM <- transform(df_CM, text = c(m[1, 1], m[1, 2], m[2, 1], m[2, 2]))
+  colnames(df_CM)[1:2] <- c("Prediction", "Truth")
+  p <- plot_ly(
+    x = x, 
+    y = y,
+    z = m, 
+    colors = colors, 
+    type = "heatmap"
+  )%>% 
+    layout(
+      xaxis = list(title = 'Prediction'), 
+      yaxis = list(title = 'Truth')
+    ) %>%
+      add_annotations(x = df_CM$Prediction,
+                      y = df_CM$Truth,
+                      text = df_CM$text, 
+                      font=list(size = 20, color = "#ADADAD"), 
+                      showarrow = FALSE)
+  
+  # 重要性長條圖
+  imp_plot <- plot_ly(
+                imp, 
+                x = imp$Imp,
+                y = imp$Var,
+                name = "Importance",
+                type = "bar"
+              )
+  
+  # Accuracy <- unname(test_CM$overall[1])*100
+  Accuracy <- round((unname(test_CM$overall[1]) * 100), 2)
+  
+  Precision_rate <- round(unname(test_CM$byClass[5]) * 100, 2)
+  # Precision_rate <- unname(test_CM$byClass[5])*100
+  Recall_Sen_rate <- round(unname(test_CM$byClass[1]) * 100, 2)
+  # Recall_Sen_rate <- unname(test_CM$byClass[6])*100
+  Spec <- round(unname(test_CM$byClass[2]) * 100, 2)
+  # Spec <- unname(test_CM$byClass[2])*100
+  F1 <- round(unname(test_CM$byClass[7]) * 100, 2)
+  # F1 <- unname(test_CM$byClass[7])*100
+  
+  list(accuracy=Accuracy, 
+       AUC=AUC, 
+       Precision_rate=Precision_rate,
+       Recall_Sen_rate=Recall_Sen_rate, 
+       Spec=Spec, 
+       F1=F1, 
+       roc_plot=roc_plot, 
+       tprfpr_plot=tprfpr_plot, 
+       p=p, 
+       imp_plot=imp_plot)
+})
+```
+
+
+Row 1 {data-height=100}
+-----------------------------------------------------
+### **正確率**
+```{r}
+# renderValueBox({
+#     valueBox(, "Accuracy")
+#   })
+# mainPanel(h1(renderText(paste0(result()$accuracy, "%")), style="color:red; font-weight:bold;"), style="background-color:#ffa153")
+mainPanel(h3(renderText(paste0(result()$accuracy, "%")), style="color:red; font-weight:bold; text-align:center; margin:0px;"))
+```
+
+### **AUC**
+```{r}
+mainPanel(h3(renderText(paste0(result()$AUC, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+```
+
+### **精準率(Precision)**
+```{r}
+mainPanel(h3(renderText(paste0(result()$Precision_rate, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+```
+
+### **召回率(Recall)**
+```{r}
+mainPanel(h3(renderText(paste0(result()$Recall_Sen_rate, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+```
+
+### **F1-score**
+```{r}
+mainPanel(h3(renderText(paste0(result()$F1, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+```
+
+Row 2
+-----------------------------------------------------
+### **ROC圖**
+```{r}
+renderPlotly({
+  result()$roc_plot
+})
+```
+
+### **TPR & FPR(TPR and FPR at every threshold)**
+```{r}
+renderPlotly({
+  result()$tprfpr_plot
+})
+```
+
+Row 3
+-----------------------------------------------------
+### **混淆矩陣**
+```{r}
+renderPlotly({
+  result()$p
+})
+```
+
+### **變數重要性**
+```{r}
+renderPlotly({
+  result()$imp_plot
+})
+```
