@@ -6,10 +6,12 @@ output:
     theme: default
     social: menu
     source_code: embed 
+header-includes:
+    - \usepackage{setspace}\doublespacing
 runtime: shiny
 ---
 
-```{r}
+```{r setup, include=FALSE}
 # rm(list = ls(all = T)); invisible(gc())
 # pacman::p_load(dplyr, caret, ggplot2, plotly, yardstick, hrbrthemes, rchallenge, skimr, pROC, rpart, glmnet, randomForest, shiny, shinydashboard)
 library(dplyr)
@@ -36,7 +38,10 @@ skimr::skim(german)
 ```
 
 ### **資料說明** {data-width=25%}
-要算檢定力(test power)需要一個對立假設
+
+ <font size="3"><b> 1. 資料來源: UCI Machine Learning Repository </b></font> 
+
+<font size="3"><b> 2. 分析目標: 以「credit risk」為目標變數，預測1,000個客戶的信用風險程度(好/壞)。 </b></font> 
 
 模型預測 {data-icon="fas fa-chart-line"}
 =====================================================
@@ -256,27 +261,27 @@ Row 1 {data-height=100}
 #     valueBox(, "Accuracy")
 #   })
 # mainPanel(h1(renderText(paste0(result()$accuracy, "%")), style="color:red; font-weight:bold;"), style="background-color:#ffa153")
-mainPanel(h3(renderText(paste0(result()$accuracy, "%")), style="color:red; font-weight:bold; text-align:center; margin:0px;"))
+mainPanel(width = 12, h3(renderText(paste0(result()$accuracy, "%")), style="color:red; font-weight:bold; text-align:center; margin:0px;"))
 ```
 
 ### **AUC**
 ```{r}
-mainPanel(h3(renderText(paste0(result()$AUC, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+mainPanel(width = 12, h3(renderText(paste0(result()$AUC, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
 ```
 
 ### **精準率(Precision)**
 ```{r}
-mainPanel(h3(renderText(paste0(result()$Precision_rate, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+mainPanel(width = 12, h3(renderText(paste0(result()$Precision_rate, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
 ```
 
 ### **召回率(Recall)**
 ```{r}
-mainPanel(h3(renderText(paste0(result()$Recall_Sen_rate, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+mainPanel(width = 12, h3(renderText(paste0(result()$Recall_Sen_rate, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
 ```
 
 ### **F1-score**
 ```{r}
-mainPanel(h3(renderText(paste0(result()$F1, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+mainPanel(width = 12, h3(renderText(paste0(result()$F1, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
 ```
 
 Row 2
@@ -309,4 +314,14 @@ renderPlotly({
 renderPlotly({
   result()$imp_plot
 })
+
+# downloadHandler(
+#   filename = function() { 
+#     paste0("importance", ".csv")
+#   }, 
+#   content = function(file) {
+#     write.csv(myData, file)
+#   },
+#   outputArgs = list(label = "Download complete variables importance in csv file")
+# )
 ```
