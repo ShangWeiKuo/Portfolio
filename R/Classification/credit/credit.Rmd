@@ -177,7 +177,7 @@ result <- reactive({
   test_roc$specificities <- 1 - test_roc$specificities
   roc_df <- data.frame(thresholds = test_roc$thresholds, specificities = test_roc$specificities, sensitivities = test_roc$sensitivities)
   AUC <- round(auc(test_roc)*100, 2)
-  tit <- paste('AUC = ', toString(round(AUC,  2)))
+  tit <- paste('AUC = ', toString(round(AUC,  2)), '%')
   roc_plot <- plot_ly(data = roc_df, x = ~specificities, y = ~sensitivities, type = 'scatter', mode = 'lines', fill = 'tozeroy') %>% layout(title = tit, xaxis = list(title = "False Positive Rate"), yaxis = list(title = "True Positive Rate")) %>% add_segments(x = 0, xend = 1, y = 0, yend = 1, line = list(dash = "dash", color = 'black'), inherit = FALSE, showlegend = FALSE)
   
   # TPR and FPR
@@ -252,36 +252,53 @@ result <- reactive({
 })
 ```
 
-
-Row 1 {data-height=100}
+Row 1
 -----------------------------------------------------
 ### **正確率**
 ```{r}
-# renderValueBox({
-#     valueBox(, "Accuracy")
-#   })
-# mainPanel(h1(renderText(paste0(result()$accuracy, "%")), style="color:red; font-weight:bold;"), style="background-color:#ffa153")
-mainPanel(width = 12, h3(renderText(paste0(result()$accuracy, "%")), style="color:red; font-weight:bold; text-align:center; margin:0px;"))
+# mainPanel(width = 12, h3(renderText(paste0(result()$accuracy, "%")), style="color:red; font-weight:bold; text-align:center; margin:0px;"))
+library(flexdashboard)
+renderValueBox({
+  valueBox(tags$p(paste0(result()$accuracy, "%"), 
+                  style = "font-size: 75%;"), 
+           color = "darkgreen")
+})
 ```
 
 ### **AUC**
 ```{r}
-mainPanel(width = 12, h3(renderText(paste0(result()$AUC, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+renderValueBox({ 
+  valueBox(tags$p(paste0(result()$AUC, "%"), 
+                  style = "font-size: 75%;"), 
+           color = "#A80000")
+})
 ```
 
 ### **精準率(Precision)**
 ```{r}
-mainPanel(width = 12, h3(renderText(paste0(result()$Precision_rate, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+renderValueBox({ 
+  valueBox(tags$p(paste0(result()$Precision_rate, "%"), 
+                  style = "font-size: 75%;"), 
+           color = "#00A8A8")
+})
 ```
 
 ### **召回率(Recall)**
 ```{r}
-mainPanel(width = 12, h3(renderText(paste0(result()$Recall_Sen_rate, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+renderValueBox({ 
+  valueBox(tags$p(paste0(result()$Recall_Sen_rate, "%"), 
+                  style = "font-size: 75%;"), 
+           color = "#A86E00")
+})
 ```
 
 ### **F1-score**
 ```{r}
-mainPanel(width = 12, h3(renderText(paste0(result()$F1, "%")), style="color:red; font-weight:bold; text-align:center;  margin:0px;"))
+renderValueBox({ 
+  valueBox(tags$p(paste0(result()$F1, "%"), 
+                  style = "font-size: 75%;"), 
+           color = "	#A8A800")
+})
 ```
 
 Row 2
