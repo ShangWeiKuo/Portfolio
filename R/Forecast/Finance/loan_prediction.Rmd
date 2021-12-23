@@ -76,6 +76,7 @@ result
 ```{r}
 mape <- MAPE(result$pred, df_trend[110:115, 2])
 smape <- SMAPE(result$pred, df_trend[110:115, 2])
+cat(paste0("MAPE = ", mape, "\n", "SMAPE = ", smape))
 ```
 
 ```{r}
