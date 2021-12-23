@@ -1,0 +1,85 @@
+---
+title: "個人總貸款預測"
+output: html_notebook
+---
+
+```{r}
+rm(list = ls(all = T)); invisible(gc())
+pacman::p_load(bit64, skimr, lubridate, dplyr, ggplot2, plotly,forecast, DescTools)
+```
+
+```{r}
+df <- data.table::fread("Total_Amt.CSV", encoding = "UTF-8")
+```
+
+```{r}
+View(df)
+colnames(df)[4] <- c("個人貸款總金額")
+```
+
+```{r}
+str(df)
+```
+
+```{r}
+df$`個人貸款總金額` <- as.numeric(df$`個人貸款總金額`)
+class(df$`個人貸款總金額`)
+```
+
+```{r}
+# date <- format(ym(paste0(df$年, df$月)), "%Y%m")
+date <- ym(paste0(df$年, df$月))
+```
+
+```{r}
+df_trend <- cbind(data.frame(date), df$`個人貸款總金額`)
+colnames(df_trend)[2] <- c("個人貸款總金額")
+df_trend$個人貸款總金額 <- as.numeric(df_trend$個人貸款總金額)
+```
+
+```{r}
+trend <- ggplot(df_trend, aes(x = date, y = 個人貸款總金額, group = 1)) + 
+  geom_line(size = 1.5)
+ggplotly(trend)
+```
+
+```{r}
+trend <- df_trend$個人貸款總金額
+trend <- ts(trend, start = 2012, end = 2021, frequency = 12)
+trend
+```
+
+```{r}
+plot(trend)
+```
+
+```{r}
+acf(trend)
+pacf(trend)
+```
+
+```{r}
+model <- auto.arima(x = trend)
+model
+```
+
+```{r}
+acf(model$residuals)
+pacf(model$residuals)
+```
+
+```{r}
+result <- predict(model, n.ahead = 6, se.fit = TRUE)
+result
+```
+
+```{r}
+mape <- MAPE(result$pred, df_trend[110:115, 2])
+smape <- SMAPE(result$pred, df_trend[110:115, 2])
+```
+
+```{r}
+theForecast <- forecast(model, h = 6)
+plot(theForecast, main = "ARIMA預測結果", xlab = "年", ylab = "個人總貸款金額(仟元)")
+```
+
