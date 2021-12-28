@@ -8,7 +8,7 @@
 
 #### 二、	資料欄位與檢視
 <p align="center">
-  <img src="https://github.com/Vivian19970428/R-project/blob/master/Picture/%E5%BB%BA%E6%A8%A1%E7%94%A8%E8%B3%87%E6%96%99%E9%9B%86.png" width="400px">
+  <img src="https://github.com/ShangWeiKuo/Portfolio/tree/main/R/Forecast/Finance/image/trend.png" width="400px">
   <br>
    圖 1		建模用資料集
 </p>
@@ -18,7 +18,7 @@
 引入ggplot2與plotly套件，並將資料集轉為時間序列型態資料，因為時間欄位中含有月份，因此frequency設定為12(週期為12個月)，接著以折線圖方式觀察2012-2021年個人總貸款金額的變化趨勢。從折線圖來看，個人總貸款金額金額呈現正成長的趨勢，因此我們將預測該項目未來的借貸情形是否為穩定正成長。
 <p align="center">
   <kbd>
-    <img src="https://github.com/ShangWeiKuo/Portfolio/tree/main/R/Forecast/Finance/image/trend.png", width="800px">
+    <img src="https://github.com/ShangWeiKuo/Portfolio/tree/main/R/Forecast/Finance/image/trend.png" width="800px">
   </kbd>
   <br>
    圖 2		折線圖程式碼
