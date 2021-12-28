@@ -35,6 +35,7 @@
 |<p align="center"><kbd><img src="/R/Forecast/Finance/image/acf_arima.png" width="400px"></kbd><br>ARIMA模型的ACF圖</p>|<p align="center"><kbd><img src="/R/Forecast/Finance/image/pacf_arima.png" width="400px"></kbd><br>ARIMA模型的PACF圖</p>|
 <br>
 
+## 模型與預測
 #### 三、	建立預測模型
 1.	利用predict函數預測個人總貸款未來6個月(202102-202107)的可能金額，並利用forecast函數將ARIMA模型結果轉換成圖表。
 <p align="center">
