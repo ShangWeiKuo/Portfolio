@@ -8,7 +8,7 @@
 
 #### 二、	資料欄位與檢視
 <p align="center">
-  <kbd><img src="https://github.com/ShangWeiKuo/Portfolio/tree/main/R/Forecast/Finance/image/data_summary.png"></kbd>
+  <img src="https://github.com/ShangWeiKuo/Portfolio/tree/main/R/Forecast/Finance/image/data_summary.png">
   <br>
    圖 1		建模用資料集
 </p>
