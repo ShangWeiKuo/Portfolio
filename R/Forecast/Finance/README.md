@@ -8,7 +8,7 @@
 
 #### 二、	資料欄位與檢視
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ShangWeiKuo/Portfolio/tree/main/R/Forecast/Finance/image/trend.png" width="400px">
+  <img src="/R/Forecast/Finance/image/data_summary.png" width="400px">
   <br>
    圖 1		建模用資料集
 </p>
