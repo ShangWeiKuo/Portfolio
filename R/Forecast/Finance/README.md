@@ -31,8 +31,8 @@
 
 |一般情況|ARIMA模型|
 |---|---|
-|<p align="center"><kbd><img src="/R/Forecast/Finance/image/acf.png" width="400px"></kbd><br>ACF圖</p>|<p align="center"><kbd><img src="/R/Forecast/Finance/image/pacf.png.png" width="400px"></kbd><br>PACF圖</p>|
-|<p align="center"><kbd><img src="/R/Forecast/Finance/image/acf_arima.png" width="400px"></kbd><br>ARIMA模型的ACF圖</p>|<p align="center"><kbd><img src="/R/Forecast/Finance/image/pacf_arima.pngg" width="400px"></kbd><br>ARIMA模型的PACF圖</p>|
+|<p align="center"><kbd><img src="/R/Forecast/Finance/image/acf.png" width="400px"></kbd><br>ACF圖</p>|<p align="center"><kbd><img src="/R/Forecast/Finance/image/pacf.png" width="400px"></kbd><br>PACF圖</p>|
+|<p align="center"><kbd><img src="/R/Forecast/Finance/image/acf_arima.png" width="400px"></kbd><br>ARIMA模型的ACF圖</p>|<p align="center"><kbd><img src="/R/Forecast/Finance/image/pacf_arima.png" width="400px"></kbd><br>ARIMA模型的PACF圖</p>|
 <br>
 
 #### 三、	建立預測模型
