@@ -12,3 +12,4 @@
 
 ## 分析流程
 * `1. 資料前置處理<#1. 資料前置處理>`_
+`Outlier Analysis <https://www.springer.com/gp/book/9781461463955>`_ 
