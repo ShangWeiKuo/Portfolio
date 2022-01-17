@@ -11,8 +11,7 @@
 
 <p align="center">
   <img src="/Python/Classification/Multiclass/Wafer/image/cnn_comparison.png">
-  
-  圖片來源: \[ [paper](https://arxiv.org/abs/1605.07678) \] \[ [blog](https://towardsdatascience.com/neural-network-architectures-156e5bad51ba) \]
+  圖片來源:  &#91;<a href="https://arxiv.org/abs/1605.07678">paper</a>&#93; &nbsp; &#91;<a href="https://towardsdatascience.com/neural-network-architectures-156e5bad51ba">blog</a>&#93;
 </p>
 
 ## 分析流程
