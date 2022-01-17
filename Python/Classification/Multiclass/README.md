@@ -9,6 +9,7 @@
   <font size=14><b><li>處理器: GPU</li></b></font>
 </ol>
 ![image](https://github.com/ShangWeiKuo/Portfolio/blob/main/Python/Classification/Multiclass/Wafer/image/cnn_comparison.png)
+
 Source: [paper](https://arxiv.org/abs/1605.07678) [blog](https://towardsdatascience.com/neural-network-architectures-156e5bad51ba)
 <br>
 
