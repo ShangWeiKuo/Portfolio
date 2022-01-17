@@ -14,7 +14,7 @@
 </p>
 
 <center>
-  Source: \[]  \[ [blog](https://towardsdatascience.com/neural-network-architectures-156e5bad51ba) \]
+  \[]  \[ [blog](https://towardsdatascience.com/neural-network-architectures-156e5bad51ba) \]
   <br>
 </center>
 
