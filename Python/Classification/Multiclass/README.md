@@ -13,8 +13,9 @@
   <img src="/Python/Classification/Multiclass/Wafer/image/cnn_comparison.png">
 </p>
 
-Source: [paper](https://arxiv.org/abs/1605.07678)  [blog](https://towardsdatascience.com/neural-network-architectures-156e5bad51ba)
-<br>
+<center>
+  Source: \[[paper]\](https://arxiv.org/abs/1605.07678)  \[[blog]\](https://towardsdatascience.com/neural-network-architectures-156e5bad51ba)
+</center>
 
 ## 分析流程
 [1. 資料前置處理](#1. 資料前置處理)
