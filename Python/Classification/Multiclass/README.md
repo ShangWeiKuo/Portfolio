@@ -1,4 +1,4 @@
-# 半導體晶圓表面缺陷分類
+# 半導體晶圓表面缺陷分類-以輕量級卷基神經網路為例
 <ol>
   <font size=14><b><li>研究議題: 圖像辨識、遷移(轉換)學習</li></b></font>
   <font size=14><b><li>資料名稱來源: WM-811K wafer map(https://www.kaggle.com/qingyi/wm811k-wafer-map) </li></b></font>
@@ -10,7 +10,7 @@
 </ol>
 
 <p align="center">
-  <img src="/Python/Classification/Multiclass/Wafer/image/cnn_comparison.png">
+  <img src="/Python/Classification/Multiclass/Wafer/image/cnn_comparison.png", width="500">
   圖片來源:  &#91;<a href="https://arxiv.org/abs/1605.07678">paper</a>&#93; &#91;<a href="https://towardsdatascience.com/neural-network-architectures-156e5bad51ba">blog</a>&#93;
 </p>
 
