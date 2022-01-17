@@ -10,7 +10,7 @@
 </ol>
 
 <p align="center">
-  <img src="/Python/Classification/Multiclass/Wafer/image/cnn_comparison.png", width="800">
+  <img src="/Python/Classification/Multiclass/Wafer/image/cnn_comparison.png", width="700"><br>
   圖片來源:  &#91;<a href="https://arxiv.org/abs/1605.07678">paper</a>&#93; &#91;<a href="https://towardsdatascience.com/neural-network-architectures-156e5bad51ba">blog</a>&#93;
 </p>
 
