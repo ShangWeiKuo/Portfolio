@@ -1,7 +1,7 @@
 # 半導體晶圓表面缺陷分類-以輕量級深度神經網路模型為例
 <ol>
   <font size=14><b><li>研究議題: 圖像辨識、遷移(轉換)學習</li></b></font>
-  <font size=14><b><li>資料名稱來源: WM-811K wafer map(https://www.kaggle.com/qingyi/wm811k-wafer-map) </li></b></font>
+  <font size=14><b><li>資料名稱來源: <a href="https://www.kaggle.com/qingyi/wm811k-wafer-map">WM-811K wafer map</a> </li></b></font>
   <font size=14><b><li>資料授權種類: CC0: Public Domain</li></b></font>
   <font size=14><b><li>使用語言: Python</li></b></font>
   <font size=14><b><li>運作環境: Colaboratory</li></b></font>
@@ -19,7 +19,9 @@
 
 ## 分析流程
 <ol>
-  <li><a href="#preprocess"> 資料前置處理</a></li>
+  <li><a href="#preprocess"> 資料前置處理 </a></li>
+  <li><a href="#preprocess"> 模型建置 </a></li>
+  <li><a href="#preprocess"> 模型評估 </a></li>
 </ol>
 
 ## 1. 資料前置處理
