@@ -12,9 +12,9 @@
 <p align="center">
   <img src="/Python/Classification/Multiclass/Wafer/image/cnn_comparison.png">
 </p>
-\[\]
+
 <center>
-  Source: \[\]  \[ [blog](https://towardsdatascience.com/neural-network-architectures-156e5bad51ba) \]
+  Source: \[]  \[ [blog](https://towardsdatascience.com/neural-network-architectures-156e5bad51ba) \]
   <br>
 </center>
 
