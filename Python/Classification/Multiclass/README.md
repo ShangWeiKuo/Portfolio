@@ -12,9 +12,10 @@
 <p align="center">
   <img src="/Python/Classification/Multiclass/Wafer/image/cnn_comparison.png">
 </p>
-Source: [paper](https://arxiv.org/abs/1605.07678)
 
- <br>
+Source: [paper](https://arxiv.org/abs/1605.07678)
+<br>
+
 ## 分析流程
 [1. 資料前置處理](#1. 資料前置處理)
 
