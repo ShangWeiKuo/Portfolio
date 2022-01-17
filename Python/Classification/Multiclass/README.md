@@ -10,7 +10,7 @@
 </ol>
 
 ## 前言
-
+隨著近年來自動駕駛、物聯網與智慧醫療的興起，邊緣裝置，而早期的深度神經網路模型雖然在預測準確度上有著亮眼的表現，但是所需要的參數也與之成正比，這意味著模型會面臨記憶體不足的困境，從而影響
 <p align="center">
   <img src="/Python/Classification/Multiclass/Wafer/image/cnn_comparison.png", width="700"><br>
   圖片來源:  &#91;<a href="https://arxiv.org/abs/1605.07678">paper</a>&#93; &#91;<a href="https://towardsdatascience.com/neural-network-architectures-156e5bad51ba">blog</a>&#93;
