@@ -18,6 +18,9 @@
 </p>
 
 ## 分析流程
+<p align="center">
+  <img src="/Python/Classification/Multiclass/Wafer/image/schedule.png", width="400">
+</p>
 <ol>
   <li><a href="#preprocess"> 資料前置處理 </a></li>
   <li><a href="#preprocess"> 模型建置 </a></li>
