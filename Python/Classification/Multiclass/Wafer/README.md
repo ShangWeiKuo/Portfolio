@@ -34,7 +34,7 @@
   <img src="/Python/Classification/Multiclass/Wafer/image/filter.png", width="500">
 </p>
 <p align="center">
-  <img src="/Python/Classification/Multiclass/Wafer/image/filter_resize.png", width="500">
+  <img src="/Python/Classification/Multiclass/Wafer/image/filter_resize.png", width="700">
 </p>
 
 ## 2. 模型建置
