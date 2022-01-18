@@ -28,8 +28,8 @@
 </ol>
 
 ## 1. 資料前置處理
-根據國立清華大學博士生所著論文**視覺特徵用於大規模學習: 以晶圓圖與音樂曲風分類為例**，針對晶圓圖案上出現的雜訊，可以藉由median filter方法去除之，且相較於沒有去除雜訊的圖片，前者在分類預測上的效果優於後者，因此本研究將以median filter去除晶圓圖片上的雜訊。<br>
 ### 1-1 Median Filter
+根據國立清華大學博士生所著論文**視覺特徵用於大規模學習: 以晶圓圖與音樂曲風分類為例**，針對晶圓圖案上出現的雜訊，可以藉由median filter方法去除之，且相較於沒有去除雜訊的圖片，前者在分類預測上的效果優於後者，因此本研究將以median filter去除晶圓圖片上的雜訊。<br>
 <p align="center">
   <img src="/Python/Classification/Multiclass/Wafer/image/filter.png", width="500">
 </p>
