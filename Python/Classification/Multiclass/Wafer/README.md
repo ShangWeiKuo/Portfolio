@@ -33,3 +33,6 @@
 <p align="center">
   <img src="/Python/Classification/Multiclass/Wafer/image/filter.png", width="500">
 </p>
+## 2. 模型建置
+
+## 3. 模型評估
