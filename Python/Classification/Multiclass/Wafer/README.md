@@ -40,3 +40,9 @@
 ## 2. 模型建置
 
 ## 3. 模型評估
+<p align="center">
+  <img src="/Python/Classification/Multiclass/Wafer/image/evaluation-accuracy.png", width="300">
+</p>
+<p align="center">
+  <img src="/Python/Classification/Multiclass/Wafer/image/dense_roc.png", width="700">
+</p>
