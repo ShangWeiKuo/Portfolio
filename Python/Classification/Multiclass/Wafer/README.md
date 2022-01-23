@@ -39,7 +39,7 @@
 
 ## 2. 模型建置
 <p align="center">
-  <img src="/Python/Classification/Multiclass/Wafer/image/model.png", width="700">
+  <img src="/Python/Classification/Multiclass/Wafer/image/model.png", width="500">
 </p>
 
 ## 3. 模型評估
