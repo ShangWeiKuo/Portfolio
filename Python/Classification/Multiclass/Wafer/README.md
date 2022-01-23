@@ -23,8 +23,8 @@
 </p>
 <ol>
   <li><a href="#preprocess"> 資料前置處理 </a></li>
-  <li><a href="#preprocess"> 模型建置 </a></li>
-  <li><a href="#preprocess"> 模型評估 </a></li>
+  <li><a href="#model"> 模型建置 </a></li>
+  <li><a href="#evaluation"> 模型評估 </a></li>
 </ol>
 
 ## 1. 資料前置處理
@@ -38,6 +38,9 @@
 </p>
 
 ## 2. 模型建置
+<p align="center">
+  <img src="/Python/Classification/Multiclass/Wafer/image/model.png", width="700">
+</p>
 
 ## 3. 模型評估
 <p align="center">
